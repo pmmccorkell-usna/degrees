@@ -62,26 +62,41 @@ def main():
 	load_data(directory)
 	print("Data loaded.")
 
-	source = person_id_for_name(input("Name: "))
-	if source is None:
-		sys.exit("Person not found.")
-	target = person_id_for_name(input("Name: "))
-	if target is None:
-		sys.exit("Person not found.")
+	while(1):
+		target=None
+		source = None
 
-	path = shortest_path(source, target)
+		while source is None:
+			text_in = input("Name: ")
+			if text_in == 'exit':
+				sys.exit('aufwiedersehen')
+			else:
+				source = person_id_for_name(text_in)
+			if source is None:
+				print("Source not found.")
 
-	if path is None:
-		print("Not connected.")
-	else:
-		degrees = len(path)
-		print(f"{degrees} degrees of separation.")
-		path = [(None, source)] + path
-		for i in range(degrees):
-			person1 = people[path[i][1]]["name"]
-			person2 = people[path[i + 1][1]]["name"]
-			movie = movies[path[i + 1][0]]["title"]
-			print(f"{i + 1}: {person1} and {person2} starred in {movie}")
+		while target is None:
+			text_in = input("Name: ")
+			if text_in == 'exit':
+				sys.exit('aufwiedersehen')
+			else:
+				target = person_id_for_name(text_in)
+			if target is None:
+				print("Target not found.")
+
+		path = shortest_path(source, target)
+
+		if path is None:
+			print("Not connected.")
+		else:
+			degrees = len(path)
+			print(f"{degrees} degrees of separation.")
+			path = [(None, source)] + path
+			for i in range(degrees):
+				person1 = people[path[i][1]]["name"]
+				person2 = people[path[i + 1][1]]["name"]
+				movie = movies[path[i + 1][0]]["title"]
+				print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
 
 def shortest_path(source, target):
@@ -97,39 +112,25 @@ def shortest_path(source, target):
 
 	# return list of int tuples, ie [(1,6),(4,5),...]
 	# in form movie_id, person_id
-	#
+	
 	# If no path, return None
-	#
-	# init_node = Node(source,None,None)
-	# check_node = init_node
-	# success = []
-
-	# while check_node.state not target:
-	# 	for movie_id,neighbor_id in neighbors_for_person(check_node.state):
-	# 		QueueFrontier.add(Node(neighbor_id, check_node, movie_id))
-	# 	check_node = QueueFrontier.remove()
-	# while check_node not None:
-	# 	success.append((check_node.action,check_node.state))
-	# 	check_node = check_node.parent
-	# return success
-
-	success = []
-
-	# parents = []
-
-	init_node = Node(source,[],None)
+	
+	init_node = Node(source,None,None)
 	check_node = init_node
+	success = []
+	frontier = QueueFrontier()
 
-
-	while check_node.state not target:
+	while check_node.state != target:
 		for movie_id,neighbor_id in neighbors_for_person(check_node.state):
-			QueueFrontier.add(Node(neighbor_id, check_node.parent.append(check_node), movie_id))
-		check_node = QueueFrontier.remove()
-	# success.append((check_node.action,check_node.state))
-	for node in check_node.parent:
-		success.append((node.action,node.state))
-	return success.reverse()
-
+			frontier.add(Node(neighbor_id, check_node, movie_id))
+		check_node = frontier.remove()
+	while check_node is not None:
+		if check_node.action is not None:
+			success.append((check_node.action,check_node.state))
+		check_node = check_node.parent
+	print(success)
+	success.reverse()
+	return success
 
 
 
